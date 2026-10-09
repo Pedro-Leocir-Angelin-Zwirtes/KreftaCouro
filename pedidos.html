@@ -1,0 +1,142 @@
+<!doctype html><html lang="pt-BR"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Krefta Couro — Pedidos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--cream:#f4efe4;--paper:#fffdf8;--ink:#29251f;--muted:#766f63;--green:#556844;--dark:#3e4d32;--leather:#6b4328;--line:#ddd4c5;--danger:#8f3f32;--shadow:0 14px 35px rgba(64,47,29,.10)}
+*{box-sizing:border-box}body{margin:0;background:var(--cream);color:var(--ink);font-family:Manrope,Arial,sans-serif}button,input{font:inherit}button{cursor:pointer}
+.topbar{background:var(--dark);color:#fffaf0;padding:9px 20px;text-align:center;font-size:11px;letter-spacing:.13em;text-transform:uppercase}
+header{background:var(--paper);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:20}.nav{max-width:1180px;margin:auto;padding:18px 22px;display:flex;justify-content:space-between;align-items:center;gap:15px}.brand{font:600 30px/1 "Cormorant Garamond",serif;color:var(--leather);text-decoration:none}.nav-actions{display:flex;gap:8px}.nav-btn,.logout{padding:10px 14px;text-decoration:none;font-size:11px;font-weight:700;border-radius:3px;border:1px solid var(--green);background:transparent;color:var(--dark)}.logout{border-color:var(--line);color:var(--muted)}
+main{max-width:1180px;margin:auto;padding:34px 22px 70px}h1{font:600 48px/.9 "Cormorant Garamond",serif;margin:0 0 8px}.intro{color:var(--muted);font-size:12px;margin:0 0 25px;line-height:1.6}.toolbar{display:flex;gap:9px;flex-wrap:wrap;align-items:center;margin-bottom:18px}.search{max-width:360px;flex:1}.search input{width:100%;border:1px solid var(--line);background:var(--paper);padding:11px 12px;color:var(--ink);outline:none;border-radius:3px}.refresh{border:1px solid var(--green);background:var(--green);color:#fff;padding:11px 15px;font-size:11px;font-weight:700;border-radius:3px}.status{font-size:11px;color:var(--dark)}
+.table-card{background:var(--paper);border:1px solid var(--line);box-shadow:var(--shadow);border-radius:3px;overflow:hidden}.orders{width:100%;border-collapse:collapse}.orders th{text-align:left;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);padding:13px 12px;border-bottom:1px solid var(--line)}.orders td{padding:13px 12px;border-bottom:1px solid #eee8de;font-size:11px;vertical-align:top}.number{font-weight:700;color:var(--leather)}.date{font-size:10px;color:var(--muted);white-space:nowrap}.items{max-width:360px;line-height:1.55}.total{font-weight:700;white-space:nowrap}.actions{display:flex;gap:6px;flex-wrap:wrap}.action{padding:7px 9px;font-size:9px;font-weight:700;border-radius:3px;border:1px solid var(--line);background:transparent;color:var(--muted)}.print{border-color:var(--green);color:var(--dark)}.edit{border-color:#c6a77a;color:var(--leather)}.delete{border-color:#d7b6af;background:#fff8f6;color:var(--danger)}.empty,.loading{padding:35px;text-align:center;color:var(--muted);font-size:12px}
+#toast{position:fixed;z-index:100;left:50%;bottom:22px;transform:translate(-50%,15px);background:var(--ink);color:#fff;padding:11px 17px;font-size:11px;opacity:0;pointer-events:none;transition:.2s}#toast.show{opacity:1;transform:translate(-50%,0)}
+#loginScreen{position:fixed;inset:0;z-index:9999;background:var(--cream);display:grid;place-items:center;padding:20px}.login-box{width:min(410px,100%);background:var(--paper);border:1px solid var(--line);box-shadow:var(--shadow);padding:34px}.login-brand{text-align:center;font:600 42px/.9 "Cormorant Garamond",serif;color:var(--leather);margin-bottom:8px}.login-sub{text-align:center;color:var(--muted);font-size:10px;letter-spacing:.12em;text-transform:uppercase;margin-bottom:25px}.login-box label,.field label{display:block;margin:13px 0 6px;font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}.login-box input,.field input{width:100%;border:1px solid var(--line);background:#fffdf8;padding:10px 11px;color:var(--ink);outline:none}.login-btn{width:100%;margin-top:18px;padding:13px;border:0;background:var(--green);color:#fff;font-size:11px;font-weight:700}.login-error{min-height:17px;margin-top:10px;text-align:center;color:var(--danger);font-size:10px}.hidden{display:none!important}
+.modal{position:fixed;inset:0;background:rgba(41,37,31,.45);z-index:1000;display:grid;place-items:center;padding:20px}.modal-box{width:min(760px,100%);max-height:90vh;overflow:auto;background:var(--paper);border:1px solid var(--line);box-shadow:0 20px 60px rgba(0,0,0,.2);padding:24px}.modal-head{display:flex;justify-content:space-between;align-items:center}.modal-title{font:600 31px/1 "Cormorant Garamond",serif;color:var(--leather)}.close,.cancel{border:1px solid var(--line);background:transparent;padding:8px 11px;color:var(--muted)}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}.item{border:1px solid var(--line);padding:12px;margin-bottom:8px;background:#fffdf8}.item-name{font-size:11px;font-weight:700}.item-meta{font-size:9px;color:var(--muted);margin:5px 0}.qty{width:90px!important}.item-grid{display:grid;grid-template-columns:2fr 1fr 90px 110px 34px;gap:8px;align-items:end}.item-grid label{font-size:9px;color:var(--muted);display:block;margin-bottom:4px}.item-grid input,.item-grid select{width:100%;padding:9px 8px;border:1px solid var(--line);background:#fff;font:inherit;font-size:11px}.remove-item{height:35px;border:1px solid #c9b8aa;background:#fff;color:#8a4a38;font-weight:700;cursor:pointer}.add-item{height:38px;border:1px solid var(--green);background:transparent;color:var(--dark);padding:0 12px;font-size:10px;font-weight:700;cursor:pointer}.modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:18px}.save{border:0;background:var(--green);color:#fff;padding:11px 15px;font-size:11px;font-weight:700}
+@media(max-width:700px){
+main{padding:24px 12px 55px}.nav{padding:13px 12px}.brand{font-size:26px}.nav-btn:first-child{display:none}h1{font-size:40px}
+.toolbar{align-items:stretch}.search{max-width:none;flex-basis:100%}.refresh{width:100%}
+.table-card{border:0;box-shadow:none;background:transparent;overflow:visible}
+.orders,.orders tbody,.orders tr,.orders td{display:block;width:100%}.orders thead{display:none}
+.orders tr{background:var(--paper);border:1px solid var(--line);box-shadow:0 5px 18px rgba(64,47,29,.07);margin-bottom:12px;border-radius:4px;overflow:hidden}
+.orders td{padding:9px 12px;border-bottom:1px solid #eee8de;font-size:11px}.orders td:last-child{border-bottom:0}
+.orders td:nth-child(1){padding-bottom:3px;border-bottom:0}.orders td:nth-child(2){padding-top:0}
+.orders td:nth-child(3):before{content:'CLIENTE';display:block;font-size:8px;letter-spacing:.1em;color:var(--muted);font-weight:700;margin-bottom:3px}
+.orders td:nth-child(4):before{content:'ITENS';display:block;font-size:8px;letter-spacing:.1em;color:var(--muted);font-weight:700;margin-bottom:5px}
+.orders td:nth-child(5):before{content:'TOTAL';display:block;font-size:8px;letter-spacing:.1em;color:var(--muted);font-weight:700;margin-bottom:3px}
+.orders td:nth-child(6):before{content:'AÇÕES';display:block;font-size:8px;letter-spacing:.1em;color:var(--muted);font-weight:700;margin-bottom:6px}
+.items{max-width:none}.actions{display:grid;grid-template-columns:1fr 1fr 1fr}.action{padding:10px 5px}
+.modal{padding:8px;place-items:end center}.modal-box{width:100%;max-height:94vh;padding:16px;border-radius:5px}
+.modal-head{gap:10px}.modal-title{font-size:27px}.grid2{grid-template-columns:1fr;gap:4px}
+.item-grid{grid-template-columns:1fr 1fr;gap:9px}.item-grid>div:first-child{grid-column:1/-1}.item-grid>div:nth-child(2){grid-column:1/-1}
+.item-grid>div:nth-child(3),.item-grid>div:nth-child(4){grid-column:auto}.remove-item{height:38px;grid-column:1/-1}
+.modal-actions{display:grid;grid-template-columns:1fr 1fr}.modal-actions button{width:100%;padding:12px}
+}
+</style></head><body>
+<div id="loginScreen"><div class="login-box"><div class="login-brand">Krefta Couro</div><div class="login-sub">Acesso administrativo</div><form id="loginForm"><label>Usuário</label><input id="user" required><label>Senha</label><input id="pass" type="password" required><button class="login-btn">ENTRAR</button><div id="loginError" class="login-error"></div></form></div></div>
+<div class="topbar">Pedidos · Coleção Ilex Paraguariensis</div>
+<header><nav class="nav"><a class="brand" href="admin.html">Krefta Couro</a><div class="nav-actions"><a class="nav-btn" href="admin.html">← ADMINISTRAÇÃO</a><a class="nav-btn" href="impressao.html">🖨 IMPRESSÃO</a><button class="logout" onclick="logout()">SAIR</button></div></nav></header>
+<main><h1>Pedidos</h1><p class="intro">Todos os pedidos registrados pelo catálogo. Consulte, edite, imprima ou exclua quando necessário.</p>
+<div class="toolbar"><div class="search"><input id="search" placeholder="Buscar por nº ou cliente..." oninput="render()"></div><button class="refresh" onclick="load()">↻ ATUALIZAR</button><span id="status" class="status"></span></div>
+<section class="table-card"><div id="area" class="loading">Carregando pedidos...</div></section></main>
+<div id="modal" class="modal hidden"><div class="modal-box"><div class="modal-head"><h2 id="modalTitle" class="modal-title">Editar pedido</h2><button class="close" onclick="closeModal()">FECHAR</button></div>
+<div class="grid2"><div class="field"><label>Cliente</label><input id="editClient"></div><div class="field"><label>Data e hora</label><input id="editDate" type="datetime-local"></div></div>
+<div class="grid2"><div class="field"><label>CPF/CNPJ</label><input id="editDoc"></div><div class="field"><label>E-mail</label><input id="editEmail" type="email"></div></div>
+<div class="grid2"><div class="field"><label>Valor total</label><input id="editTotal" type="number" min="0" step=".01"></div><div class="field"><label>Itens</label><button type="button" class="add-item" onclick="addEditItem()">＋ ADICIONAR ITEM</button></div></div>
+<div class="field"><label>Produtos do pedido</label><div id="editItems"></div></div>
+<div class="modal-actions"><button class="cancel" onclick="closeModal()">CANCELAR</button><button class="save" onclick="saveEdit()">SALVAR ALTERAÇÕES</button></div></div></div>
+<div id="toast"></div>
+<script>
+const SUPABASE_URL='https://dfamkxcrhngrqryiajxa.supabase.co',SUPABASE_KEY='sb_publishable_qC9X9rZgdzxL6RjhL-DLxQ_YJiOYc7z';
+const supabaseClient=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);let orders=[],products=[],editing=null;
+async function hash(s){const data=new TextEncoder().encode(s);const buf=await crypto.subtle.digest('SHA-256',data);return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('')}
+function logged(){return sessionStorage.getItem('krefta_admin')==='1'}function logout(){sessionStorage.removeItem('krefta_admin');location.reload()}
+document.getElementById('loginForm').addEventListener('submit',async e=>{e.preventDefault();if(document.getElementById('user').value.trim()==='Krefta'&&await hash(document.getElementById('pass').value)=== '8145db1d83259c6bd97095adb66eb89e1fa4375422e422858b688daeb0bfe5ae'){sessionStorage.setItem('krefta_admin','1');document.getElementById('loginScreen').classList.add('hidden');load()}else document.getElementById('loginError').textContent='Usuário ou senha inválidos.'});
+if(logged())document.getElementById('loginScreen').classList.add('hidden');
+function esc(v){return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
+function money(v){return Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}
+function date(v){let d=new Date(v);return isNaN(d)?'—':d.toLocaleString('pt-BR',{dateStyle:'short',timeStyle:'short'})}
+function toast(s){let t=document.getElementById('toast');t.textContent=s;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200)}
+function items(o){return Array.isArray(o.itens)?o.itens:[]}function qty(x){return Number(x.quantidade??x.qty??0)}function name(x){return x.nome||x.name||'Produto'}function code(x){return x.codigo||x.code||'—'}function color(x){return x.cor||x.color||'—'}function price(x){return Number(x.preco??x.price??0)}function isoLocal(v){if(!v)return '';let d=new Date(v);if(isNaN(d))return '';d=new Date(d.getTime()-d.getTimezoneOffset()*60000);return d.toISOString().slice(0,16)}function productOptions(selected){
+  return '<option value="">Selecione o produto</option>'+
+    products.map(p=>`<option value="${esc(p.id)}" ${String(p.id)===String(selected)?'selected':''}>${esc(p.codigo||'—')} — ${esc(p.nome||'Produto')}</option>`).join('');
+}
+async function loadProducts(){
+  const r=await supabaseClient.from('produtos').select('id,nome,codigo,preco,categoria').order('criado_em',{ascending:true});
+  if(r.error){console.error('Erro ao carregar produtos:',r.error);products=[];return false}
+  products=r.data||[];
+  return true;
+}
+function enrichOrderItems(){
+  orders.forEach(o=>{
+    if(!Array.isArray(o.itens))return;
+    o.itens=o.itens.map(x=>{
+      const p=products.find(p=>String(p.id)===String(x.id));
+      if(!p)return x;
+      return {...x,id:p.id,nome:x.nome||x.name||p.nome,codigo:x.codigo||x.code||p.codigo,preco:Number(x.preco??x.price??p.preco??0)};
+    });
+  });
+}
+async function load(){document.getElementById('area').innerHTML='<div class="loading">Carregando pedidos...</div>';let r=await supabaseClient.from('pedidos').select('*').order('numero',{ascending:false});if(r.error){console.error(r.error);document.getElementById('area').innerHTML='<div class="empty">Erro ao carregar os pedidos.</div>';return}orders=r.data||[];enrichOrderItems();render()}
+function render(){let q=document.getElementById('search').value.trim().toLowerCase(),a=orders.filter(o=>String(o.numero).includes(q)||String(o.cliente||'').toLowerCase().includes(q));document.getElementById('status').textContent=`${orders.length} pedido(s)`;if(!a.length){document.getElementById('area').innerHTML='<div class="empty">Nenhum pedido encontrado.</div>';return}
+document.getElementById('area').innerHTML=`<table class="orders"><thead><tr><th>Pedido</th><th>Data</th><th>Cliente</th><th>Itens</th><th>Total</th><th>Ações</th></tr></thead><tbody>${a.map(o=>`<tr><td><span class="number">Nº ${String(o.numero).padStart(4,'0')}</span></td><td><span class="date">${esc(date(o.criado_em))}</span></td><td>${esc(o.cliente||'—')}</td><td><div class="items">${items(o).map(x=>`${qty(x)}× ${esc(name(x))}${color(x)!=='—'?' — '+esc(color(x)):''}`).join('<br>')||'Nenhum item'}</div></td><td><span class="total">${money(o.total)}</span></td><td><div class="actions"><button class="action print" onclick="printOrder(${o.numero})">🖨 IMPRIMIR</button><button class="action edit" onclick="openEdit(${o.numero})">EDITAR</button><button class="action delete" onclick="del(${o.numero})">EXCLUIR</button></div></td></tr>`).join('')}</tbody></table>`}
+function renderEditItems(){
+  const its=items(editing);
+  document.getElementById('editItems').innerHTML=its.map((x,i)=>`<div class="item" data-item="${i}">
+    <div class="item-grid">
+      <div><label>PRODUTO</label><select class="editProduct" data-i="${i}" onchange="productChanged(${i})">${productOptions(x.id)}</select></div>
+      <div><label>COR</label><input class="editColor" data-i="${i}" type="text" value="${esc(color(x)==='—'?'':color(x))}" placeholder="Marrom"></div>
+      <div><label>QUANTIDADE</label><input class="qty editQty" data-i="${i}" type="number" min="0" step="1" value="${qty(x)}"></div>
+      <div><label>VALOR UNITÁRIO</label><input class="editPrice" data-i="${i}" type="number" min="0" step="0.01" value="${price(x).toFixed(2)}"></div>
+      <button type="button" class="remove-item" title="Remover item" onclick="removeEditItem(${i})">×</button>
+    </div>
+    <div class="item-meta">Código e nome acompanham o produto selecionado.</div>
+  </div>`).join('')||'<div class="empty">Nenhum item. Clique em ADICIONAR ITEM para incluir.</div>';
+}
+function openEdit(n){
+  editing=orders.find(o=>Number(o.numero)===Number(n));if(!editing)return;
+  document.getElementById('modalTitle').textContent='Editar pedido Nº '+String(n).padStart(4,'0');
+  document.getElementById('editClient').value=editing.cliente||'';
+  document.getElementById('editDate').value=isoLocal(editing.criado_em);
+  document.getElementById('editTotal').value=Number(editing.total||0);
+  document.getElementById('editDoc').value=editing.cpf_cnpj||'';
+  document.getElementById('editEmail').value=editing.email||'';
+  renderEditItems();
+  document.getElementById('modal').classList.remove('hidden');
+}
+function productChanged(i){
+  const sel=document.querySelector(`.editProduct[data-i="${i}"]`);const id=sel?.value;const p=products.find(x=>String(x.id)===String(id));if(!p||!editing)return;
+  const its=items(editing); if(!its[i])return; its[i].id=p.id;its[i].nome=p.nome;its[i].codigo=p.codigo;its[i].preco=Number(p.preco)||0; delete its[i].name;delete its[i].code;delete its[i].price;renderEditItems();
+}
+function addEditItem(){
+  if(!editing)return;
+  if(!products.length){alert('Nenhum produto foi carregado do catálogo. Clique em ATUALIZAR e tente novamente.');return;}
+  editing.itens=items(editing).map(x=>({...x}));
+  editing.itens.push({id:'',codigo:'',nome:'',cor:'',quantidade:1,preco:0});
+  renderEditItems();
+  const selects=document.querySelectorAll('.editProduct');
+  const last=selects[selects.length-1];
+  if(last)last.focus();
+}
+function removeEditItem(i){if(!editing)return;editing.itens=items(editing).filter((_,idx)=>idx!==i);renderEditItems();}
+function closeModal(){editing=null;document.getElementById('modal').classList.add('hidden')}
+async function saveEdit(){
+  if(!editing)return;
+  let its=items(editing).map(x=>({...x}));
+  document.querySelectorAll('.editProduct').forEach(e=>{const i=Number(e.dataset.i),p=products.find(x=>String(x.id)===String(e.value));if(p&&its[i]){its[i].id=p.id;its[i].nome=p.nome;its[i].codigo=p.codigo;}});
+  document.querySelectorAll('.editQty').forEach(e=>{const i=Number(e.dataset.i);if(its[i])its[i].quantidade=Math.max(0,Math.floor(Number(e.value)||0))});
+  document.querySelectorAll('.editColor').forEach(e=>{const i=Number(e.dataset.i);if(!its[i])return;const v=e.value.trim();its[i].cor=v||null;delete its[i].color;delete its[i].colorName});
+  document.querySelectorAll('.editPrice').forEach(e=>{const i=Number(e.dataset.i);if(!its[i])return;const v=Math.max(0,Number(e.value)||0);its[i].preco=Number(v.toFixed(2));delete its[i].price});
+  its=its.filter(x=>qty(x)>0);
+  let payload={cliente:document.getElementById('editClient').value.trim()||null,itens:its,total:Number((Number(document.getElementById('editTotal').value)||0).toFixed(2)),criado_em:new Date(document.getElementById('editDate').value).toISOString()};
+  if('cpf_cnpj' in editing)payload.cpf_cnpj=document.getElementById('editDoc').value.trim()||null;
+  if('email' in editing)payload.email=document.getElementById('editEmail').value.trim()||null;
+  let r=await supabaseClient.from('pedidos').update(payload).eq('numero',editing.numero).select('*').single();
+  if(r.error){console.error(r.error);alert('Não foi possível salvar a alteração.\n\nVerifique se o Supabase permite UPDATE na tabela pedidos.');return}
+  orders[orders.findIndex(o=>o.numero===editing.numero)]=r.data;closeModal();render();toast('Pedido atualizado.');
+}
+async function del(n){let o=orders.find(x=>x.numero===n);if(!confirm(`Excluir o pedido Nº ${String(n).padStart(4,'0')}?`))return;let r=await supabaseClient.from('pedidos').delete().eq('numero',n);if(r.error){console.error(r.error);alert('Não foi possível excluir o pedido.');return}orders=orders.filter(x=>x.numero!==n);render();toast('Pedido excluído.')}
+function printOrder(n){let o=orders.find(x=>x.numero===n);if(!o)return;let w=window.open('','_blank','width=900,height=800');if(!w){alert('Permita pop-ups para imprimir.');return}let rows=items(o).map(x=>`<tr><td><b>${esc(name(x))}</b><small>Código: ${esc(code(x))}</small></td><td>${esc(color(x))}</td><td class=r>${qty(x)}</td><td class=r>${money(x.preco??x.price??0)}</td><td class=r><b>${money((Number(x.preco??x.price??0)||0)*qty(x))}</b></td></tr>`).join('');let totalItems=items(o).reduce((a,x)=>a+qty(x),0);w.document.write(`<!doctype html><html><head><meta charset=utf-8><title>Pedido ${n}</title><style>*{box-sizing:border-box}body{font-family:Arial;color:#29251f;font-size:11px}@page{size:A4;margin:13mm 12mm}.head{display:flex;justify-content:space-between;border-bottom:2px solid #3e4d32;padding-bottom:14px}.brand{font-size:27px;font-weight:bold;color:#6b4328}.sub,small{display:block;color:#766f63;font-size:8px;margin-top:3px}.meta{text-align:right;color:#766f63;line-height:1.6}.section{margin-top:20px;font-size:8px;letter-spacing:.12em;text-transform:uppercase;color:#556844;font-weight:bold}.client{font-size:18px;padding:7px 0 12px;border-bottom:1px solid #ddd4c5}.table{width:100%;border-collapse:collapse;margin-top:8px}.table th{text-align:left;font-size:8px;color:#766f63;text-transform:uppercase;padding:7px 4px;border-bottom:1px solid #ddd4c5}.table td{padding:9px 4px;border-bottom:1px solid #eee8de}.r{text-align:right;white-space:nowrap}.sum{margin-left:auto;width:240px;margin-top:18px}.row{display:flex;justify-content:space-between;padding:5px;color:#766f63}.grand{border-top:2px solid #3e4d32;margin-top:5px;padding-top:9px;color:#29251f;font-size:16px;font-weight:bold}</style></head><body><div class=head><div><div class=brand>Krefta Couro</div><div class=sub>Coleção Ilex Paraguariensis</div></div><div class=meta><b>PEDIDO Nº ${String(n).padStart(4,'0')}</b><br>${esc(date(o.criado_em))}</div></div><div class=section>Cliente</div><div class=client>${esc(o.cliente||'Cliente não informado')}</div><div class=section>Itens do pedido</div><table class=table><thead><tr><th>Produto</th><th>Cor</th><th class=r>Qtd.</th><th class=r>Valor unit.</th><th class=r>Subtotal</th></tr></thead><tbody>${rows}</tbody></table><div class=sum><div class=row><span>Total de itens</span><b>${totalItems}</b></div><div class="row grand"><span>VALOR TOTAL</span><span>${money(o.total)}</span></div></div><script>window.onload=()=>setTimeout(()=>window.print(),180)<\/script></body></html>`);w.document.close();w.focus()}
+if(logged())(async()=>{await loadProducts();await load()})();
+</script></body></html>
